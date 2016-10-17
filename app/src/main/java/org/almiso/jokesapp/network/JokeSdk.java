@@ -3,19 +3,18 @@ package org.almiso.jokesapp.network;
 
 import android.support.annotation.NonNull;
 
+import org.almiso.jokesapp.util.Constants;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class JokeSdk {
 
-    public static final String BASE_URL = "http://api.icndb.com/";
-
     private static OkHttpClient sClient;
 
     @NonNull
-    public static OkHttpClient getClient() {
+    private static OkHttpClient getClient() {
         OkHttpClient client = sClient;
         if (client == null) {
             synchronized (JokeSdk.class) {
@@ -36,12 +35,12 @@ public class JokeSdk {
 //                .build();
     }
 
-    public static Retrofit getRetrofit(){
+    public static Retrofit getRetrofit() {
         return new Retrofit.Builder()
-                .baseUrl(JokeSdk.BASE_URL)
+                .baseUrl(Constants.BASE_URL)
                 .client(JokeSdk.getClient())
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addCallAdapterFactory(RxErrorHandlingCallAdapterFactory.create())
                 .build();
     }
 }

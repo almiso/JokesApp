@@ -11,11 +11,11 @@ public class RandomJoke extends BaseRequest<RandomJokeResponse> {
 
     private interface IRandomJoke {
         @GET("jokes/random")
-        Observable<RandomJokeResponse> prepareRequest();
+        Observable<RandomJokeResponse> createRequest();
     }
 
     @Override
-    protected Observable prepareRequest() {
-        return JokeSdk.getRetrofit().create(IRandomJoke.class).prepareRequest();
+    protected Observable createRequest() {
+        return JokeSdk.getRetrofit().create(IRandomJoke.class).createRequest();
     }
 }

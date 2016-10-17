@@ -20,11 +20,11 @@ public class JokeForName extends BaseRequest<RandomJokeResponse> {
 
     private interface IJokeForName {
         @GET("jokes/random")
-        Observable<RandomJokeResponse> prepareRequest(@Query("firstName") String firstName, @Query("lastName") String lastName);
+        Observable<RandomJokeResponse> createRequest(@Query("firstName") String firstName, @Query("lastName") String lastName);
     }
 
     @Override
-    protected Observable prepareRequest() {
-        return JokeSdk.getRetrofit().create(IJokeForName.class).prepareRequest(firstName, lastName);
+    protected Observable createRequest() {
+        return JokeSdk.getRetrofit().create(IJokeForName.class).createRequest(firstName, lastName);
     }
 }

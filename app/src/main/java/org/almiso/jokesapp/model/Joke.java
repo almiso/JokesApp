@@ -16,7 +16,17 @@ public class Joke extends JokeObject {
     @SerializedName("categories")
     private List<String> categories;
 
+
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return "Joke{" +
+                "id=" + id +
+                ", value='" + value + '\'' +
+                ", categories=" + categories +
+                '}';
     }
 }

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/col_white"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="org.almiso.jokesapp.MainActivity"
+    tools:context="org.almiso.jokesapp.ui.MainActivity"
     tools:showIn="@layout/activity_main">
 
     <LinearLayout
@@ -17,16 +17,16 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:background="@color/col_tv_background"
-            android:gravity="start"
+            android:gravity="start|bottom"
             android:paddingBottom="4dp"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="8dp"
             android:text="Random joke"
             android:textColor="@color/col_black"
-            android:textSize="20sp" />
+            android:textSize="14sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -57,16 +57,16 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:background="@color/col_tv_background"
-            android:gravity="start"
+            android:gravity="start|bottom"
             android:paddingBottom="4dp"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="8dp"
             android:text="Joke by name"
             android:textColor="@color/col_black"
-            android:textSize="20sp" />
+            android:textSize="14sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -115,28 +115,20 @@
                 android:padding="4dp"
                 android:textColor="@color/col_text_primary"
                 android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/button_joke_by_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="Get joke by name"
-                android:textColor="@color/col_text_primary" />
         </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:background="@color/col_tv_background"
-            android:gravity="start"
+            android:gravity="start|bottom"
             android:paddingBottom="4dp"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="8dp"
             android:text="Few random jokes"
             android:textColor="@color/col_black"
-            android:textSize="20sp" />
+            android:textSize="14sp" />
 
         <LinearLayout
             android:layout_width="match_parent"

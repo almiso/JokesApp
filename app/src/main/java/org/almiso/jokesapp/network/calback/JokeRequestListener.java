@@ -1,7 +1,7 @@
 package org.almiso.jokesapp.network.calback;
 
 import org.almiso.jokesapp.model.base.JokeError;
-import org.almiso.jokesapp.model.base.JokeObject;
+import org.almiso.jokesapp.model.base.JokeResponse;
 
 /**
  * Extend listeners for requests from that class.
@@ -12,7 +12,7 @@ public abstract class JokeRequestListener {
      *
      * @param response response from BaseRequest.
      */
-    public void onComplete(JokeObject response) {
+    public void onComplete(JokeResponse response) {
     }
 
     /**

@@ -1,47 +1,54 @@
-package org.almiso.jokesapp;
+package org.almiso.jokesapp.ui;
 
-import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jakewharton.rxbinding.widget.RxTextView;
+
+import org.almiso.jokesapp.R;
 import org.almiso.jokesapp.model.FewJokesResponse;
 import org.almiso.jokesapp.model.Joke;
 import org.almiso.jokesapp.model.RandomJokeResponse;
+import org.almiso.jokesapp.model.User;
 import org.almiso.jokesapp.model.base.JokeError;
-import org.almiso.jokesapp.model.base.JokeObject;
-import org.almiso.jokesapp.network.request.BaseRequest;
+import org.almiso.jokesapp.model.base.JokeResponse;
 import org.almiso.jokesapp.network.JokesApi;
 import org.almiso.jokesapp.network.calback.JokeRequestListener;
-import org.almiso.jokesapp.network.calback.ProgressInterface;
+import org.almiso.jokesapp.network.request.BaseRequest;
+import org.almiso.jokesapp.util.Constants;
 import org.almiso.jokesapp.util.Logger;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity {
+import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 
-    /* Constants */
-
-    private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String lineSeparator = System.getProperty("line.separator");
+public class MainActivity extends BaseActivity {
 
     /* Views */
 
     private TextView tvRandomJoke;
     private TextView tvJokeByName;
     private TextView tvFewJokes;
-    private EditText editFirstName;
-    private EditText editLastName;
 
     /* Controls */
 
-    private ProgressDialog progressDialog;
+    private Subscription usersSubscription;
 
     /* Common methods */
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        usersSubscription.unsubscribe();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
 
         initToolbar();
         initViews();
-        initData();
     }
 
     /* Initialisation methods */
@@ -62,74 +68,68 @@ public class MainActivity extends AppCompatActivity {
 
     private void initViews() {
         tvRandomJoke = (TextView) findViewById(R.id.tv_random_joke);
+        updateViewVisibility(tvRandomJoke, false);
         tvJokeByName = (TextView) findViewById(R.id.tv_joke_by_name);
+        updateViewVisibility(tvJokeByName, false);
         tvFewJokes = (TextView) findViewById(R.id.tv_few_jokes);
-
-        editFirstName = (EditText) findViewById(R.id.edit_first_name);
-        editLastName = (EditText) findViewById(R.id.edit_last_name);
+        updateViewVisibility(tvFewJokes, false);
 
         findViewById(R.id.button_random).setOnClickListener(v -> {
             getRandomJoke();
         });
 
-        findViewById(R.id.button_joke_by_name).setOnClickListener(v -> {
-            getJokeByName();
-        });
-
         findViewById(R.id.button_few_jokes).setOnClickListener(v -> {
             getFewJokes();
         });
+
+        createSearchByUser();
     }
 
-    private void initData() {
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle(R.string.app_name);
-        progressDialog.setMessage(getString(R.string.app_name));
-        progressDialog.setCanceledOnTouchOutside(false);
-        progressDialog.setCancelable(false);
-    }
-
-    /* private methods */
+    /* Network methods */
 
     private void getRandomJoke() {
         BaseRequest request = JokesApi.common().getRandomJoke();
         request.setProgressInterface(getProgressInterface());
         request.setRequestListener(new JokeRequestListener() {
             @Override
-            public void onComplete(JokeObject response) {
+            public void onComplete(JokeResponse response) {
                 RandomJokeResponse jokeResponse = (RandomJokeResponse) response;
+
+                updateViewVisibility(tvRandomJoke, true);
                 tvRandomJoke.setText(jokeResponse.getJoke().getValue());
             }
 
             @Override
             public void onError(JokeError error) {
                 Logger.d(TAG, "onError. error: " + error);
+                Toast.makeText(MainActivity.this, error.getErrorMessage(), Toast.LENGTH_SHORT).show();
             }
         });
         request.execute();
     }
 
-    private void getJokeByName() {
-        String firstName = editFirstName.getText().toString();
-        String lastName = editLastName.getText().toString();
-
+    private void getJokeByName(User user) {
+        String firstName = user.getFirstName().toString();
+        String lastName = user.getLastName().toString();
         if (TextUtils.isEmpty(firstName) || TextUtils.isEmpty(lastName)) {
             Toast.makeText(this, "First ot last name are empty", Toast.LENGTH_SHORT).show();
             return;
         }
 
         BaseRequest request = JokesApi.common().getJokeForName(firstName, lastName);
-        request.setProgressInterface(getProgressInterface());
         request.setRequestListener(new JokeRequestListener() {
             @Override
-            public void onComplete(JokeObject response) {
+            public void onComplete(JokeResponse response) {
                 RandomJokeResponse jokeResponse = (RandomJokeResponse) response;
+
+                updateViewVisibility(tvJokeByName, true);
                 tvJokeByName.setText(jokeResponse.getJoke().getValue());
             }
 
             @Override
             public void onError(JokeError error) {
                 Logger.d(TAG, "onError. error: " + error);
+                Toast.makeText(MainActivity.this, error.getErrorMessage(), Toast.LENGTH_SHORT).show();
             }
         });
         request.execute();
@@ -140,43 +140,55 @@ public class MainActivity extends AppCompatActivity {
         request.setProgressInterface(getProgressInterface());
         request.setRequestListener(new JokeRequestListener() {
             @Override
-            public void onComplete(JokeObject response) {
+            public void onComplete(JokeResponse response) {
                 FewJokesResponse jokeResponse = (FewJokesResponse) response;
                 StringBuilder builder = new StringBuilder();
 
                 for (Joke joke : jokeResponse.getJokes()) {
                     builder.append(joke.getValue());
-                    builder.append(lineSeparator);
-                    builder.append(lineSeparator);
+                    builder.append(Constants.LINE_SEPARATOR);
+                    builder.append(Constants.LINE_SEPARATOR);
                 }
 
                 String jokes = builder.toString();
+
+                updateViewVisibility(tvFewJokes, true);
                 tvFewJokes.setText(jokes);
             }
 
             @Override
             public void onError(JokeError error) {
                 Logger.d(TAG, "onError. error: " + error);
+                Toast.makeText(MainActivity.this, error.getErrorMessage(), Toast.LENGTH_SHORT).show();
             }
         });
         request.execute();
     }
 
-    private ProgressInterface getProgressInterface() {
-        return new ProgressInterface() {
-            @Override
-            public void showProgress() {
-                if (progressDialog != null && !progressDialog.isShowing()) {
-                    progressDialog.show();
-                }
-            }
+    private void createSearchByUser() {
 
-            @Override
-            public void hideProgress() {
-                if (progressDialog != null && progressDialog.isShowing()) {
-                    progressDialog.dismiss();
-                }
-            }
-        };
+        EditText editFirstName = (EditText) findViewById(R.id.edit_first_name);
+        EditText editLastName = (EditText) findViewById(R.id.edit_last_name);
+
+        Observable<CharSequence> firstNameObservable = RxTextView.textChanges(editFirstName);
+        Observable<CharSequence> lastNameObservable = RxTextView.textChanges(editLastName);
+
+        usersSubscription = Observable.combineLatest(firstNameObservable, lastNameObservable,
+                User::new)
+                .debounce(400, TimeUnit.MILLISECONDS)
+                .filter(user -> !TextUtils.isEmpty(user.getFirstName()) && !TextUtils.isEmpty(user.getLastName()))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::getJokeByName, throwable -> {
+                    Logger.e(TAG, throwable);
+                });
+    }
+
+    /* Util methods */
+
+    private void updateViewVisibility(View view, boolean isVisible) {
+        if (view == null) {
+            return;
+        }
+        view.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 }

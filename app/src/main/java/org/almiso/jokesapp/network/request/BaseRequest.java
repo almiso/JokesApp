@@ -2,7 +2,8 @@ package org.almiso.jokesapp.network.request;
 
 import android.os.Handler;
 
-import org.almiso.jokesapp.model.base.JokeObject;
+import org.almiso.jokesapp.model.base.JokeError;
+import org.almiso.jokesapp.model.base.JokeResponse;
 import org.almiso.jokesapp.network.calback.JokeRequestListener;
 import org.almiso.jokesapp.network.calback.ProgressInterface;
 
@@ -15,7 +16,11 @@ import static android.os.Looper.getMainLooper;
 /**
  * Base request class.
  */
-public abstract class BaseRequest<T extends JokeObject> {
+public abstract class BaseRequest<T extends JokeResponse> {
+
+    /* Constants */
+
+    String TAG;
 
     /* Data */
 
@@ -23,7 +28,18 @@ public abstract class BaseRequest<T extends JokeObject> {
 
     private JokeRequestListener requestListener;
 
-    protected abstract Observable<T> prepareRequest();
+    private int retryCount;
+
+    /* Protected methods */
+
+    protected abstract Observable<T> createRequest();
+
+    /* Constructors */
+
+    BaseRequest() {
+        this.TAG = this.getClass().getSimpleName();
+        this.retryCount = 1;
+    }
 
     /* Public methods */
 
@@ -35,28 +51,18 @@ public abstract class BaseRequest<T extends JokeObject> {
         this.requestListener = requestListener;
     }
 
+    public void setRetryCount(int retryCount) {
+        this.retryCount = retryCount;
+    }
+
     public void execute() {
-        prepareRequest()
+        createRequest()
+                .retry(retryCount)
                 .doOnSubscribe(this::showProgress)
                 .doAfterTerminate(this::hideProgress)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onComplete, throwable -> onError());
-
-        // TODO: 17.10.16 other params can configure on concrete request
-//              .map(response::getMovies)
-//                .flatMap(movies -> {
-//                    Realm.getDefaultInstance().executeTransaction(realm -> {
-//                        realm.delete(Movie.class);
-//                        realm.insert(movies);
-//                    });
-//                    return Observable.just(movies);
-//                })
-//                .onErrorResumeNext(throwable -> {
-//                    Realm realm = Realm.getDefaultInstance();
-//                    RealmResults<Movie> results = realm.where(Movie.class).findAll();
-//                    return Observable.just(realm.copyFromRealm(results));
-//                })
+                .subscribe(this::onComplete, this::onError);
     }
 
     /* private methods */
@@ -73,15 +79,24 @@ public abstract class BaseRequest<T extends JokeObject> {
         }
     }
 
-    private void onComplete(JokeObject response) {
+    private void onComplete(JokeResponse response) {
         if (requestListener != null) {
             requestListener.onComplete(response);
         }
     }
 
-    private void onError() {
+    private void onError(Throwable throwable) {
+        JokeError error = (JokeError) throwable;
+        error.setRequest(this);
         if (requestListener != null) {
-            requestListener.onError(null);
+            requestListener.onError(error);
         }
+    }
+
+    /* Override methods */
+
+    @Override
+    public String toString() {
+        return "Request{" + TAG + "}";
     }
 }

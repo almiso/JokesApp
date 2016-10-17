@@ -27,6 +27,13 @@ public class Logger {
         Log.e("Joke|" + TAG, "Exception in class " + TAG, e);
     }
 
+    public static void e(String TAG, Throwable throwable) {
+        if (!ENABLED) {
+            return;
+        }
+
+        Log.e("Joke|" + TAG, "Exception in class " + TAG, throwable);
+    }
 
     public static void e(String TAG, String message, Exception e) {
         if (!ENABLED) {

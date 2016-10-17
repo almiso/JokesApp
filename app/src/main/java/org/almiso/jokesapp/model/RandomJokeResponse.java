@@ -1,14 +1,11 @@
 package org.almiso.jokesapp.model;
 
-
 import com.google.gson.annotations.SerializedName;
 
-import org.almiso.jokesapp.model.base.JokeObject;
+import org.almiso.jokesapp.model.base.JokeResponse;
 
-public class RandomJokeResponse extends JokeObject {
+public class RandomJokeResponse extends JokeResponse {
 
-    @SerializedName("type")
-    private String type;
     @SerializedName("value")
     private Joke joke;
 
