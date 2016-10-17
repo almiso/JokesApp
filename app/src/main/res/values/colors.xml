@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Theme-->
+    <color name="colorPrimary">#4CAF50</color>
+    <color name="colorPrimaryDark">#43A047</color>
+    <color name="colorAccent">#3F51B5</color>
+
+    <!--Common-->
+    <color name="col_white">#FFFFFF</color>
+    <color name="col_black">#000000</color>
+    <color name="col_tv_background">#F5F5F5</color>
+
+    <!--Text-->
+    <color name="col_text_primary">#212121</color>
+</resources>
